@@ -1,0 +1,61 @@
+buildscript {
+    ext {
+        kotlinVersion = '1.3.11'
+    }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}")
+        classpath("org.jetbrains.kotlin:kotlin-allopen:${kotlinVersion}")
+    }
+}
+
+apply plugin: 'kotlin'
+
+group 'com.github.grishberg'
+version '0.1.9'
+
+ext {
+    PUBLISH_GROUP_ID = group
+    PUBLISH_ARTIFACT_ID = 'android-performance'
+    PUBLISH_VERSION = version
+}
+
+repositories {
+    jcenter()
+    mavenCentral()
+    mavenLocal()
+    maven {
+        url 'https://maven.google.com'
+    }
+}
+
+dependencies {
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.11.1'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.1'
+    compile 'com.android.tools.ddms:ddmlib:26.1.0'
+    compile "com.github.grishberg:android-instrumental-test-runner-core:1.0.3"
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+compileTestKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+
+// need to call  ./gradlew clean build generateRelease
+apply from: 'publish.gradle'
+
+apply plugin: 'maven-publish'
+// ./gradlew publishToMavenLocal
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+}

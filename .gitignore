@@ -1,0 +1,10 @@
+*.iml
+.gradle
+/local.properties
+/.idea
+.DS_Store
+/build
+.externalNativeBuild
+/Performeter/build
+/Performeter/app/release
+/Performeter/app/build
