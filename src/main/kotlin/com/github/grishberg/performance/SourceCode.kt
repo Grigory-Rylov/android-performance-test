@@ -8,33 +8,37 @@ interface SourceCode {
 class KotlinSource(
         private val firstIndex: Boolean,
         private val importCode: String = "",
+        private val fieldCode: String = "",
         private val sourceCode: String = ""
 ) : SourceCode {
 
     override fun replaceWithCode(fileSystem: SourceFiles) {
         val index = if (firstIndex) 1 else 2
-        fileSystem.moveTemplateAndReplaceSource("KotlinSample$index.kt", importCode, sourceCode)
+        fileSystem.moveTemplateAndReplaceSource("KotlinSample$index.kt",
+                importCode, fieldCode, sourceCode)
     }
 
     override fun createAlternativeEmptySource(fileSystem: SourceFiles) {
         val index = if (firstIndex) 1 else 2
-        fileSystem.moveTemplateAndReplaceSource("JavaSample$index.java", "", "")
+        fileSystem.moveTemplateAndReplaceSource("JavaSample$index.java", "", "", "")
     }
 }
 
 class JavaSource(
         private val firstIndex: Boolean,
         private val importCode: String = "",
+        private val fieldCode: String = "",
         private val sourceCode: String = ""
 ) : SourceCode {
 
     override fun replaceWithCode(fileSystem: SourceFiles) {
         val index = if (firstIndex) 1 else 2
-        fileSystem.moveTemplateAndReplaceSource("JavaSample$index.java", importCode, sourceCode)
+        fileSystem.moveTemplateAndReplaceSource("JavaSample$index.java",
+                importCode, fieldCode, sourceCode)
     }
 
     override fun createAlternativeEmptySource(fileSystem: SourceFiles) {
         val index = if (firstIndex) 1 else 2
-        fileSystem.moveTemplateAndReplaceSource("KotlinSample$index.kt", "", "")
+        fileSystem.moveTemplateAndReplaceSource("KotlinSample$index.kt", "", "", "")
     }
 }

@@ -13,6 +13,5 @@ class StartActivityCommand(
     override fun execute(device: ConnectedDeviceWrapper) {
         val mode = ""
         device.executeShellCommand(String.format(START_APK_COMMAND, mode))
-
     }
 }

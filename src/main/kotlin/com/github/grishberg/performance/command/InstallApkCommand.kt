@@ -1,14 +1,13 @@
 package com.github.grishberg.performance.command
 
 import com.github.grishberg.tests.ConnectedDeviceWrapper
-import com.github.grishberg.tests.commands.DeviceCommandResult
 import com.github.grishberg.tests.commands.ExecuteCommandException
 import com.github.grishberg.tests.common.RunnerLogger
 import java.io.File
 import java.util.*
 
 private const val TAG = "InstallApkCommand"
-private const val PATH_TO_APK = "env/Performeter/app/build/outputs/apk/release/app-release.apk"
+private const val PATH_TO_APK = "env/android-performeter-sample/app/build/outputs/apk/release/app-release.apk"
 
 class InstallApkCommand(
         private val logger: RunnerLogger

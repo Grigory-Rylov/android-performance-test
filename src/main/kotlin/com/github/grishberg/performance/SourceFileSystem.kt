@@ -1,19 +1,15 @@
 package com.github.grishberg.performance
 
 import com.github.grishberg.tests.common.RunnerLogger
-import org.apache.commons.io.FileUtils
 import java.io.*
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.io.IOException
-import java.io.FileOutputStream
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
 
 private const val TAG = "SourceFileSystem"
-private const val TEMPLATE_DIR = "env/templates"
-private const val SOURCE_DIR = "env/Performeter/app/src/main/java/com/grishberg/performeter/samples"
+private const val SOURCE_DIR = "env/android-performeter-sample/app/src/main/java/com/grishberg/performeter/samples"
 
 class SourceFileSystem(
         private val logger: RunnerLogger
@@ -81,7 +77,7 @@ class SourceFileSystem(
 
     private fun makeExecutable() {
         Runtime.getRuntime().exec("chmod u+x " + "env/assemble.sh")
-        Runtime.getRuntime().exec("chmod u+x " + "env/Performeter/gradlew")
+        Runtime.getRuntime().exec("chmod u+x " + "env/android-performeter-sample/gradlew")
     }
 
     /**
@@ -89,7 +85,7 @@ class SourceFileSystem(
      */
     fun readTemplateFile(fileName: String): String {
         try {
-            return String(Files.readAllBytes(Paths.get("$TEMPLATE_DIR/$fileName")))
+            return String(Files.readAllBytes(Paths.get("$SOURCE_DIR/$fileName")))
         } catch (e: IOException) {
             e.printStackTrace()
         }

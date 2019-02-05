@@ -1,21 +1,21 @@
 package com.github.grishberg.performance
 
 import com.github.grishberg.performance.command.*
-import com.github.grishberg.tests.adb.AdbWrapper
 import com.github.grishberg.tests.common.RunnerLogger
 
 private const val TAG = "CommandsFabric"
 
 class CommandsFabric(
-        private val adb: AdbWrapper,
         sourceFileSystem: SourceFileSystem,
         private val logger: RunnerLogger,
         private val resultsPrinter: ResultsPrinter,
         private val firstSourceJava: Boolean,
         private val firstSourceImport: String,
+        private val firstSourceField: String,
         private val firstSourceCode: String,
         private val secondSourceJava: Boolean,
         private val secondSourceImport: String,
+        private val secondSourceField: String,
         private val secondSourceCode: String
 ) {
     private val sourceFiles = SourceFiles(sourceFileSystem)
@@ -41,14 +41,14 @@ class CommandsFabric(
 
     fun buildReplaceCommentCommand(): ReplaceCommentCommand {
         val sourceCode1 = if (firstSourceJava)
-            JavaSource(true, firstSourceImport, firstSourceCode)
+            JavaSource(true, firstSourceImport, firstSourceField, firstSourceCode)
         else
-            KotlinSource(true, firstSourceImport, firstSourceCode)
+            KotlinSource(true, firstSourceImport, firstSourceField, firstSourceCode)
 
         val sourceCode2 = if (secondSourceJava)
-            JavaSource(false, secondSourceImport, secondSourceCode)
+            JavaSource(false, secondSourceImport, secondSourceField, secondSourceCode)
         else
-            KotlinSource(false, secondSourceImport, secondSourceCode)
+            KotlinSource(false, secondSourceImport, secondSourceField, secondSourceCode)
         val replaceSourceCommand = ReplaceCommentCommand(sourceFiles, sourceCode1, sourceCode2)
         return replaceSourceCommand
     }

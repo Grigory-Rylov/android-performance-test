@@ -33,14 +33,16 @@ class PerformanceLauncher(
     fun measurePerformance(
             firstSourceJava: Boolean,
             firstSourceImport: String,
+            firstSourceField: String,
             firstSourceCode: String,
             secondSourceJava: Boolean,
             secondSourceImport: String,
+            secondSourceField: String,
             secondSourceCode: String) {
 
-        val commandsFabric = CommandsFabric(adb, sourceFileSystem, logger, resultsPrinter,
-                firstSourceJava, firstSourceImport, firstSourceCode,
-                secondSourceJava, secondSourceImport, secondSourceCode)
+        val commandsFabric = CommandsFabric(sourceFileSystem, logger, resultsPrinter,
+                firstSourceJava, firstSourceImport, firstSourceField, firstSourceCode,
+                secondSourceJava, secondSourceImport, secondSourceField, secondSourceCode)
 
         launchPerformance(commandsFabric)
     }

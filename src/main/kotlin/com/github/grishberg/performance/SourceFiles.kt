@@ -1,6 +1,7 @@
 package com.github.grishberg.performance
 
 private const val IMPORT_TEMPLATE = "/* place your includes there */"
+private const val FIELD_TEMPLATE = "/* place your fields and methods there */"
 private const val CODE_TEMPLATE = "/* place your code there */"
 
 class SourceFiles(
@@ -12,9 +13,13 @@ class SourceFiles(
      */
     fun moveTemplateAndReplaceSource(fileName: String,
                                      importCode: String,
+                                     fieldCode: String,
                                      sourceCode: String) {
         var content = fileSystem.readTemplateFile(fileName)
                 .replace(CODE_TEMPLATE, sourceCode)
+        if (fieldCode.isNotEmpty()) {
+            content = content.replace(FIELD_TEMPLATE, fieldCode)
+        }
         if (importCode.isNotEmpty()) {
             content = content.replace(IMPORT_TEMPLATE, importCode)
         }

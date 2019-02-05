@@ -18,7 +18,7 @@ class ReadLogcatCommand(
 
     override fun execute(device: ConnectedDeviceWrapper) {
         logger.i(TAG, "read logcat..")
-        val regex = "\\[PERF\\]\\s+\\:\\s\\(d1=(\\d+), d2=(\\d+), td1=(\\d+), td2=(\\d+)\\)".toRegex()
+        val regex = "\\[PERF\\]\\s+\\:\\s\\(d1=(\\d+), d2=(\\d+), td1=(\\d+), td2=(\\d+), md1=(\\d+), md2=(\\d+)\\)".toRegex()
         for (i in 0 until 100) {
             val logcatOutput = device.executeShellCommandAndReturnOutput(READ_LOGCAT_COMMAND)
             val results = regex.find(logcatOutput)
@@ -27,9 +27,15 @@ class ReadLogcatCommand(
                 val duration2 = results.groupValues[2].toLong()
                 val threadDuration1 = results.groupValues[3].toLong()
                 val threadDuration2 = results.groupValues[4].toLong()
+                val microDuration1 = results.groupValues[5].toLong()
+                val microDuration2 = results.groupValues[6].toLong()
+
                 logger.i(TAG, "found result: [$device]:  $duration1 vs $duration2" +
                         " ($threadDuration1 vs $threadDuration2)")
-                resultsPrinter.populateResult(device, duration1, threadDuration1, duration2, threadDuration2)
+                resultsPrinter.populateResult(device,
+                        duration1, duration2,
+                        threadDuration1, threadDuration2,
+                        microDuration1, microDuration2)
                 break
             }
             Thread.sleep(1000)
