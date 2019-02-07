@@ -35,14 +35,24 @@ class PerformanceLauncher(
             firstSourceImport: String,
             firstSourceField: String,
             firstSourceCode: String,
+            firstSourceInit: String,
             secondSourceJava: Boolean,
             secondSourceImport: String,
             secondSourceField: String,
-            secondSourceCode: String) {
+            secondSourceCode: String,
+            secondSourceInit: String) {
 
         val commandsFabric = CommandsFabric(sourceFileSystem, logger, resultsPrinter,
-                firstSourceJava, firstSourceImport, firstSourceField, firstSourceCode,
-                secondSourceJava, secondSourceImport, secondSourceField, secondSourceCode)
+                firstSourceJava,
+                firstSourceImport,
+                firstSourceField,
+                firstSourceCode,
+                firstSourceInit,
+                secondSourceJava,
+                secondSourceImport,
+                secondSourceField,
+                secondSourceCode,
+                secondSourceInit)
 
         launchPerformance(commandsFabric)
     }
@@ -50,8 +60,8 @@ class PerformanceLauncher(
     private fun launchPerformance(commandsFabric: CommandsFabric) {
         val deviceList = adb.provideDevices()
 
-        val replaceCommentCommand = commandsFabric.buildReplaceCommentCommand()
-        replaceCommentCommand.execute()
+        commandsFabric.buildReplaceCommentCommand().execute()
+        commandsFabric.provideAssembleCommand().execute()
 
         val deviceCounter = CountDownLatch(deviceList.size)
         deviceList.forEach { device ->

@@ -17,8 +17,16 @@ class FileSourcePerformanceLauncher(
         val src2 = readSourceFile("source2.kt")
 
         performanceLauncher.measurePerformance(
-                false, import1, "// fields", src1,
-                false, import2, "// fields", src2)
+                false,
+                import1,
+                "// fields",
+                src1,
+                "// init",
+                false,
+                import2,
+                "// fields",
+                src2,
+                "// init")
     }
 
     private fun readSourceFile(fileName: String): String {

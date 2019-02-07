@@ -1,17 +1,14 @@
 package com.github.grishberg.performance.command
 
-import com.github.grishberg.tests.ConnectedDeviceWrapper
 import com.github.grishberg.tests.common.RunnerLogger
-
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
-import java.nio.file.Path
 import java.nio.file.Paths
 
-class AssembleCommand(private val logger: RunnerLogger) : LauncherCommand {
+class AssembleCommand(private val logger: RunnerLogger) {
 
-    override fun execute(device: ConnectedDeviceWrapper) {
+    fun execute() {
         val processBuilder = ProcessBuilder()
 
         // -- Linux --

@@ -9,18 +9,19 @@ class KotlinSource(
         private val firstIndex: Boolean,
         private val importCode: String = "",
         private val fieldCode: String = "",
-        private val sourceCode: String = ""
+        private val sourceCode: String = "",
+        private val initCode: String = ""
 ) : SourceCode {
 
     override fun replaceWithCode(fileSystem: SourceFiles) {
         val index = if (firstIndex) 1 else 2
         fileSystem.moveTemplateAndReplaceSource("KotlinSample$index.kt",
-                importCode, fieldCode, sourceCode)
+                importCode, fieldCode, sourceCode, initCode)
     }
 
     override fun createAlternativeEmptySource(fileSystem: SourceFiles) {
         val index = if (firstIndex) 1 else 2
-        fileSystem.moveTemplateAndReplaceSource("JavaSample$index.java", "", "", "")
+        fileSystem.moveTemplateAndReplaceSource("JavaSample$index.java", "", "", "", "")
     }
 }
 
@@ -28,17 +29,18 @@ class JavaSource(
         private val firstIndex: Boolean,
         private val importCode: String = "",
         private val fieldCode: String = "",
-        private val sourceCode: String = ""
+        private val sourceCode: String = "",
+        private val initCode: String = ""
 ) : SourceCode {
 
     override fun replaceWithCode(fileSystem: SourceFiles) {
         val index = if (firstIndex) 1 else 2
         fileSystem.moveTemplateAndReplaceSource("JavaSample$index.java",
-                importCode, fieldCode, sourceCode)
+                importCode, fieldCode, sourceCode, initCode)
     }
 
     override fun createAlternativeEmptySource(fileSystem: SourceFiles) {
         val index = if (firstIndex) 1 else 2
-        fileSystem.moveTemplateAndReplaceSource("KotlinSample$index.kt", "", "", "")
+        fileSystem.moveTemplateAndReplaceSource("KotlinSample$index.kt", "", "", "", "")
     }
 }
