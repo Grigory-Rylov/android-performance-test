@@ -26,7 +26,8 @@ class FileSourcePerformanceLauncher(
                 import2,
                 "// fields",
                 src2,
-                "// init")
+                "// init",
+                1)
     }
 
     private fun readSourceFile(fileName: String): String {

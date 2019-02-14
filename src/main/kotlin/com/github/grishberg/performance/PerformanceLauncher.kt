@@ -40,7 +40,8 @@ class PerformanceLauncher(
             secondSourceImport: String,
             secondSourceField: String,
             secondSourceCode: String,
-            secondSourceInit: String) {
+            secondSourceInit: String,
+            cyclesCount: Int) {
 
         val commandsFabric = CommandsFabric(sourceFileSystem, logger, resultsPrinter,
                 firstSourceJava,
@@ -52,7 +53,8 @@ class PerformanceLauncher(
                 secondSourceImport,
                 secondSourceField,
                 secondSourceCode,
-                secondSourceInit)
+                secondSourceInit,
+                cyclesCount)
 
         launchPerformance(commandsFabric)
     }
