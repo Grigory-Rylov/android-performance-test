@@ -19,19 +19,20 @@ class CommandsFabric(
         private val secondSourceField: String,
         private val secondSourceCode: String,
         private val secondInitCode: String,
-        private val cyclesCount: Int
+        private val launchesCount: Int,
+        private val iterationsPerLaunch: Int
 ) {
     private val sourceFiles = SourceFiles(sourceFileSystem)
 
-    fun provideCommands(iterationsCount: Int = 50000): List<LauncherCommand> {
+    fun provideCommands(): List<LauncherCommand> {
         val commands = ArrayList<LauncherCommand>()
         commands.add(InstallApkCommand(logger))
-        for (i in 0 until cyclesCount) {
+        for (i in 0 until launchesCount) {
             commands.add(ClearLogcatCommand(logger))
-            commands.add(StartActivityCommand(0, generateModeForFirstRun(), iterationsCount))
+            commands.add(StartActivityCommand(0, generateModeForFirstRun(), iterationsPerLaunch))
             commands.add(ReadLogcatCommand(0, resultsPrinter, logger))
             commands.add(KillAppCommand(logger))
-            commands.add(StartActivityCommand(1, generateModeForSecondRun(), iterationsCount))
+            commands.add(StartActivityCommand(1, generateModeForSecondRun(), iterationsPerLaunch))
             commands.add(ReadLogcatCommand(1, resultsPrinter, logger))
             commands.add(KillAppCommand(logger))
         }

@@ -27,7 +27,7 @@ class FileSourcePerformanceLauncher(
                 "// fields",
                 src2,
                 "// init",
-                1)
+                1, 500000)
     }
 
     private fun readSourceFile(fileName: String): String {
