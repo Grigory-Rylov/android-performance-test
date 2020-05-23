@@ -1,18 +1,19 @@
 package com.github.grishberg.performance.command
 
 import com.github.grishberg.tests.ConnectedDeviceWrapper
-import com.github.grishberg.tests.commands.ExecuteCommandException
+import com.github.grishberg.tests.commands.CommandExecutionException
 import com.github.grishberg.tests.common.RunnerLogger
 import java.io.File
-import java.util.*
+import java.util.Locale
 
 private const val TAG = "InstallApkCommand"
 private const val PATH_TO_APK = "env/android-performeter-sample/app/build/outputs/apk/release/app-release.apk"
 
 class InstallApkCommand(
-        private val logger: RunnerLogger
+        private val logger: RunnerLogger,
+        apkPath: String = PATH_TO_APK
 ) : LauncherCommand {
-    private val apkFile = File(PATH_TO_APK)
+    private val apkFile = File(apkPath)
 
     override fun execute(device: ConnectedDeviceWrapper) {
         var lastException: Exception? = null
@@ -29,7 +30,7 @@ class InstallApkCommand(
 
         }
         if (lastException != null) {
-            throw ExecuteCommandException(String.format(Locale.US,
+            throw CommandExecutionException(String.format(Locale.US,
                     "Exception while install app apk on device [%s]",
                     device.serialNumber), lastException)
         }

@@ -1,7 +1,12 @@
-package com.github.grishberg.performance
+package com.github.grishberg.performance.environments
 
 import com.github.grishberg.tests.common.RunnerLogger
-import java.io.*
+import java.io.BufferedWriter
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.InputStream
+import java.io.OutputStreamWriter
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.zip.ZipEntry

@@ -1,5 +1,7 @@
 package com.github.grishberg.performance
 
+import com.github.grishberg.performance.launcher.SourceCodeInfo
+
 interface SourceCode {
     fun replaceWithCode(fileSystem: SourceFiles)
     fun createAlternativeEmptySource(fileSystem: SourceFiles)
@@ -7,16 +9,13 @@ interface SourceCode {
 
 class KotlinSource(
         private val firstIndex: Boolean,
-        private val importCode: String = "",
-        private val fieldCode: String = "",
-        private val sourceCode: String = "",
-        private val initCode: String = ""
+        private val sourceInfo: SourceCodeInfo
 ) : SourceCode {
 
     override fun replaceWithCode(fileSystem: SourceFiles) {
         val index = if (firstIndex) 1 else 2
         fileSystem.moveTemplateAndReplaceSource("KotlinSample$index.kt",
-                importCode, fieldCode, sourceCode, initCode)
+                sourceInfo.imports, sourceInfo.fields, sourceInfo.sourceCode, sourceInfo.initialization)
     }
 
     override fun createAlternativeEmptySource(fileSystem: SourceFiles) {
@@ -27,16 +26,13 @@ class KotlinSource(
 
 class JavaSource(
         private val firstIndex: Boolean,
-        private val importCode: String = "",
-        private val fieldCode: String = "",
-        private val sourceCode: String = "",
-        private val initCode: String = ""
+        private val sourceInfo: SourceCodeInfo
 ) : SourceCode {
 
     override fun replaceWithCode(fileSystem: SourceFiles) {
         val index = if (firstIndex) 1 else 2
         fileSystem.moveTemplateAndReplaceSource("JavaSample$index.java",
-                importCode, fieldCode, sourceCode, initCode)
+                sourceInfo.imports, sourceInfo.fields, sourceInfo.sourceCode, sourceInfo.initialization)
     }
 
     override fun createAlternativeEmptySource(fileSystem: SourceFiles) {

@@ -1,5 +1,7 @@
 package com.github.grishberg.performance
 
+import com.github.grishberg.performance.environments.SourceFileSystem
+
 private const val IMPORT_TEMPLATE = "/* place your includes there */"
 private const val FIELD_TEMPLATE = "/* place your fields and methods there */"
 private const val CODE_TEMPLATE = "/* place your code there */"
