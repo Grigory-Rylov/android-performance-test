@@ -1,62 +1,47 @@
 package com.github.grishberg.performance
 
-import com.github.grishberg.performance.command.AssembleCommand
 import com.github.grishberg.performance.command.ClearLogcatCommand
 import com.github.grishberg.performance.command.InstallApkCommand
 import com.github.grishberg.performance.command.KillAppCommand
 import com.github.grishberg.performance.command.LauncherCommand
 import com.github.grishberg.performance.command.ReadLogcatCommand
-import com.github.grishberg.performance.command.ReplaceCommentCommand
-import com.github.grishberg.performance.command.StartActivityCommand
-import com.github.grishberg.performance.environments.SourceFileSystem
+import com.github.grishberg.performance.command.StartActivityWithParametersCommand
+import com.github.grishberg.performance.command.logcat.PerfLogcatReader
 import com.github.grishberg.performance.launcher.SourceCodeInfo
+import com.github.grishberg.tests.ConnectedDeviceWrapper
 import com.github.grishberg.tests.common.RunnerLogger
+import java.io.File
 
 private const val TAG = "CompareFromSourcesCommandsFactory"
+private const val PATH_TO_APK = "env/android-performeter-sample/app/buildReport/outputs/apk/release/app-release.apk"
 
 class CompareFromSourcesCommandsFactory(
-        sourceFileSystem: SourceFileSystem,
         private val logger: RunnerLogger,
         private val resultsPrinter: ResultsPrinter,
         private val source1: SourceCodeInfo,
         private val source2: SourceCodeInfo,
         private val launchesCount: Int,
         private val iterationsPerLaunch: Int
-) : CommandsFactory {
-    private val sourceFiles = SourceFiles(sourceFileSystem)
+) : Commands {
 
-    override fun provideCommands(): List<LauncherCommand> {
+    override fun execute(device: ConnectedDeviceWrapper) {
         val commands = ArrayList<LauncherCommand>()
-        commands.add(InstallApkCommand(logger))
+        commands.add(InstallApkCommand(logger, File(PATH_TO_APK)))
         for (i in 0 until launchesCount) {
             commands.add(ClearLogcatCommand(logger))
-            commands.add(StartActivityCommand(0, generateModeForFirstRun(), iterationsPerLaunch))
-            commands.add(ReadLogcatCommand(0, resultsPrinter, logger))
+            commands.add(StartActivityWithParametersCommand(0, generateModeForFirstRun(), iterationsPerLaunch))
+            commands.add(ReadLogcatCommand(logger, PerfLogcatReader(logger, 0, resultsPrinter)))
             commands.add(KillAppCommand(logger))
-            commands.add(StartActivityCommand(1, generateModeForSecondRun(), iterationsPerLaunch))
-            commands.add(ReadLogcatCommand(1, resultsPrinter, logger))
+            commands.add(StartActivityWithParametersCommand(1, generateModeForSecondRun(), iterationsPerLaunch))
+            commands.add(ReadLogcatCommand(logger, PerfLogcatReader(logger, 1, resultsPrinter)))
             commands.add(KillAppCommand(logger))
         }
-        return commands
+        commands.forEach {
+            it.execute(device)
+        }
     }
-
-    fun provideAssembleCommand() = AssembleCommand(logger)
 
     private fun generateModeForFirstRun(): String = if (source1.language == Language.JAVA) "j1" else "k1"
 
     private fun generateModeForSecondRun(): String = if (source2.language == Language.JAVA) "j2" else "k2"
-
-    fun buildReplaceCommentCommand(): ReplaceCommentCommand {
-        val sourceCode1 = if (source1.language == Language.JAVA)
-            JavaSource(true, source1)
-        else
-            KotlinSource(true, source1)
-
-
-        val sourceCode2 = if (source2.language == Language.JAVA)
-            JavaSource(false, source2)
-        else
-            KotlinSource(false, source2)
-        return ReplaceCommentCommand(sourceFiles, sourceCode1, sourceCode2)
-    }
 }

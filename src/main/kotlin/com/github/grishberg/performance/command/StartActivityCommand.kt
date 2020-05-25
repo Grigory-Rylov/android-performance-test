@@ -2,18 +2,11 @@ package com.github.grishberg.performance.command
 
 import com.github.grishberg.tests.ConnectedDeviceWrapper
 
-private const val START_APK_COMMAND = "am start -n com.grishberg.performeter/com.grishberg.performeter.MainActivity " +
-        "--es \"mode\" \"%s\" --ei \"number\" %d --ei \"iterations\" %d"
-
-/**
- * Starts main activity.
- */
 class StartActivityCommand(
-        private val expNumber: Int,
-        private val mode: String,
-        private val iterations: Int
+        private val appId: String,
+        private val activityName: String
 ) : LauncherCommand {
     override fun execute(device: ConnectedDeviceWrapper) {
-        device.executeShellCommand(String.format(START_APK_COMMAND, mode, expNumber, iterations))
+        device.executeShellCommand("am start -n \"$appId/$activityName\" -a android.intent.action.MAIN -c android.intent.category.LAUNCHER")
     }
 }

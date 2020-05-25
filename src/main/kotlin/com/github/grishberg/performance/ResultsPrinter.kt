@@ -1,5 +1,6 @@
 package com.github.grishberg.performance
 
+import com.github.grishberg.performance.data.MeasurementData
 import com.github.grishberg.tests.ConnectedDeviceWrapper
 
 /**
@@ -9,7 +10,10 @@ interface ResultsPrinter {
     fun populateResult(experimentNumber: Int,
                        device: ConnectedDeviceWrapper,
                        threadDuration: Long,
-                       microDuration: Long)
+                       microDuration: Long) = Unit
+
+    fun populateResult(device: ConnectedDeviceWrapper,
+                       result: Map<String, MeasurementData>) = Unit
 
     fun results(): String
 }
@@ -26,4 +30,8 @@ class ConsoleResultPrinter : ResultsPrinter {
     }
 
     override fun results(): String = resultStrings
+}
+
+object EmptyResultsPrinter : ResultsPrinter {
+    override fun results(): String = ""
 }

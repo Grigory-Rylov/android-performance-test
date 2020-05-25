@@ -1,10 +1,10 @@
 package com.github.grishberg.performance
 
 import com.github.grishberg.tests.common.RunnerLogger
-import org.apache.logging.log4j.LogManager
+import org.slf4j.LoggerFactory
 
 class Log4JLogger : RunnerLogger {
-    var log = LogManager.getLogger("runner")
+    private val log = LoggerFactory.getLogger("runner")
 
     override fun i(tag: String, msg: String) {
         log.info("$tag: $msg")

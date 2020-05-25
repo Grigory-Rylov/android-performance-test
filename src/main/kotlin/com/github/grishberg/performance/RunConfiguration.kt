@@ -10,11 +10,7 @@ private const val TAG = "ParallelPerformanceLauncher"
 class RunConfiguration(
         logger: RunnerLogger
 ) {
-    val adb: AdbWrapper
-
-    init {
-        adb = initAdbConnection(logger)
-    }
+    val adb = initAdbConnection(logger)
 
     private fun initAdbConnection(logger: RunnerLogger): AdbWrapper {
         val adb = AdbWrapper()

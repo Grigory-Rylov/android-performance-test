@@ -7,23 +7,21 @@ import java.io.File
 import java.util.Locale
 
 private const val TAG = "InstallApkCommand"
-private const val PATH_TO_APK = "env/android-performeter-sample/app/build/outputs/apk/release/app-release.apk"
 
 class InstallApkCommand(
         private val logger: RunnerLogger,
-        apkPath: String = PATH_TO_APK
+        private val apkFile: File
 ) : LauncherCommand {
-    private val apkFile = File(apkPath)
 
     override fun execute(device: ConnectedDeviceWrapper) {
-        var lastException: Exception? = null
+        var lastException: Throwable? = null
         for (i in 0..2) {
             try {
                 val extraArgument = ""
                 logger.i(TAG, "InstallApkCommand: install file {}", apkFile.getName())
                 device.installPackage(apkFile.absolutePath, true, extraArgument)
                 break
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 logger.e(TAG, "InstallApkCommand: ", e)
                 lastException = e
             }

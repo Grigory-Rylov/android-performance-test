@@ -24,11 +24,7 @@ class FileSourcePerformanceLauncher(
         val src2 = readSourceFile("source2.kt")
         val souce1 = SourceCodeInfo(Language.KOTLIN, import1, "// fields", src1, "// init")
         val souce2 = SourceCodeInfo(Language.KOTLIN, import2, "// fields", src2, "// init")
-        performanceLauncher.measurePerformance(
-                configuration.adb,
-                souce1,
-                souce2,
-                1, 500000)
+
     }
 
     private fun readSourceFile(fileName: String): String {

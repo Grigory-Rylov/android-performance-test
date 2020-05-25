@@ -12,5 +12,8 @@ class ClearLogcatCommand(
     override fun execute(device: ConnectedDeviceWrapper) {
         logger.i(TAG, "clear logcat")
         device.executeShellCommand(CLEAR_LOGCAT_COMMAND)
+        Thread.sleep(200)
+        device.executeShellCommand(CLEAR_LOGCAT_COMMAND)
+        Thread.sleep(200)
     }
 }
