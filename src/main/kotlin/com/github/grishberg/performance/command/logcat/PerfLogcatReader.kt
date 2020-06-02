@@ -1,6 +1,7 @@
 package com.github.grishberg.performance.command.logcat
 
 import com.github.grishberg.performance.ResultsPrinter
+import com.github.grishberg.performance.launcher.DeviceFacade
 import com.github.grishberg.tests.ConnectedDeviceWrapper
 import com.github.grishberg.tests.common.RunnerLogger
 
@@ -14,7 +15,7 @@ class PerfLogcatReader(
 ) : LogcatParser {
     private val regex = "\\[PERF_$expNumber\\]\\:\\s\\(td=(\\d+), md=(\\d+)\\)".toRegex()
 
-    override fun processLogcatLine(logcatOutput: String, device: ConnectedDeviceWrapper): Boolean {
+    override fun processLogcatLine(logcatOutput: String, device: DeviceFacade): Boolean {
         val results = regex.find(logcatOutput)
         if (results != null) {
             val threadDuration = results.groupValues[1].toLong()

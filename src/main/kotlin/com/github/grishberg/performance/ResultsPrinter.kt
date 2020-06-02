@@ -1,6 +1,7 @@
 package com.github.grishberg.performance
 
 import com.github.grishberg.performance.data.MeasurementData
+import com.github.grishberg.performance.launcher.DeviceFacade
 import com.github.grishberg.tests.ConnectedDeviceWrapper
 
 /**
@@ -8,7 +9,7 @@ import com.github.grishberg.tests.ConnectedDeviceWrapper
  */
 interface ResultsPrinter {
     fun populateResult(experimentNumber: Int,
-                       device: ConnectedDeviceWrapper,
+                       device: DeviceFacade,
                        threadDuration: Long,
                        microDuration: Long) = Unit
 
@@ -21,7 +22,7 @@ interface ResultsPrinter {
 class ConsoleResultPrinter : ResultsPrinter {
     private var resultStrings = ""
     override fun populateResult(experimentNumber: Int,
-                                device: ConnectedDeviceWrapper,
+                                device: DeviceFacade,
                                 threadDuration: Long,
                                 microDuration: Long) {
         resultStrings = "run $experimentNumber: device=${device.name} : thread: $threadDuration ," +

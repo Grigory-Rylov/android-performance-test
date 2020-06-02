@@ -15,17 +15,19 @@ fun main(args: Array<String>) {
 }
 
 private fun compareCompiledApk(logger: Log4JLogger) {
-    val measurementCount = 50
+    val measurementCount = 10
 
     val envFactory = CompareApkEnvironmentsFactory(logger, measurementCount,
-            "com.grishberg.performeter",
-            "com.grishberg.performeter.MainActivity",
-            EnvironmentData("debuggable release", File("in/app-release-debuggable.apk")),
-            EnvironmentData("release", File("in/app-release-original.apk")),
-            "E PERF\\s+\\:\\s\\{name='(\\S+)', td=(\\d+), md=(\\d+)\\}"
+            "com.github.grishberg.performance",
+            "com.github.grishberg.performance.MainActivity",
+            EnvironmentData("base", File("<path_to_apk1>.apk")),
+            EnvironmentData("improvements", File("<path_to_apk2>.apk")),
+            "\\S+\\s\\S+\\s\\S+\\s(\\S+)\\ [time:]*\\s*([-\\d]+)",
+            "lastParameterName",
+            "dryRunLastParameterName"
     )
 
-    val launcher = ParallelPerformanceLauncher(logger, envFactory)
+    val launcher = ParallelPerformanceLauncher(logger, envFactory, "AppPerformanceStats")
 
     val configuration = RunConfiguration(logger)
     launcher.launchPerformance(configuration.adb)

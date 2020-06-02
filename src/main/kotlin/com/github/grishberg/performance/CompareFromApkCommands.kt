@@ -2,20 +2,22 @@ package com.github.grishberg.performance
 
 import com.github.grishberg.performance.aggregation.AggregatorProvider
 import com.github.grishberg.performance.aggregation.EmptyMeasurementAggregator
-import com.github.grishberg.performance.command.ClearLogcatCommand
 import com.github.grishberg.performance.command.CompositeCommand
 import com.github.grishberg.performance.command.DeleteApkCommand
 import com.github.grishberg.performance.command.InstallApkCommand
 import com.github.grishberg.performance.command.KillAppCommand
 import com.github.grishberg.performance.command.LauncherCommand
-import com.github.grishberg.performance.command.ReadLogcatCommand
+import com.github.grishberg.performance.command.ReadLogcatFromReader
 import com.github.grishberg.performance.command.SleepCommand
 import com.github.grishberg.performance.command.StartActivityCommand
 import com.github.grishberg.performance.command.logcat.LogcatParser
 import com.github.grishberg.performance.command.logcat.StartupTimeLogcatParser
+import com.github.grishberg.performance.launcher.DeviceFacade
 import com.github.grishberg.tests.ConnectedDeviceWrapper
 import com.github.grishberg.tests.common.RunnerLogger
 import java.io.File
+
+private const val TAG = "CFAC"
 
 /**
  * Deletes apk with [appId] if installed.
@@ -39,65 +41,89 @@ class CompareFromApkCommands(
         private val logger: RunnerLogger,
         private val measuresCount: Int,
         private val aggregatorProvider: AggregatorProvider,
-        private val logcatValuesPattern: String
+        private val logcatValuesPattern: String,
+        private val stopWordParameterName: String,
+        private val dryRunStopWordParameterName: String
 ) : Commands {
-    override fun execute(device: ConnectedDeviceWrapper) {
-        val commands = buildCommands()
+    override fun execute(device: DeviceFacade, logcatReader: LogcatReader) {
+        val commands = buildCommands(logcatReader)
 
+        logger.d(TAG, "execute commands count: ${commands.size}")
         commands.forEach {
+            logger.d(TAG, "execute $it")
             it.execute(device)
         }
     }
 
-    private fun buildCommands(): ArrayList<LauncherCommand> {
+    private fun buildCommands(logcatReader: LogcatReader): ArrayList<LauncherCommand> {
         val commands = ArrayList<LauncherCommand>()
-        commands.add(ClearLogcatCommand(logger))
-        commands.add(DeleteApkCommand(appId))
+        commands.add(DeleteApkCommand(appId, logger))
         commands.add(InstallApkCommand(logger, firstApk))
         commands.add(StartActivityCommand(appId, startActivityName))
-        commands.add(ReadLogcatCommand(logger, StartupTimeLogcatParser(logger, EmptyMeasurementAggregator, logcatValuesPattern)))
-        commands.add(SleepCommand(1))
-        commands.add(ClearLogcatCommand(logger))
-        commands.add(KillAppCommand(logger))
 
-        val logcatParser = StartupTimeLogcatParser(logger, aggregatorProvider.aggregator1, logcatValuesPattern)
+        val firstRunlogcatParser1 = StartupTimeLogcatParser(logger,
+                EmptyMeasurementAggregator,
+                logcatValuesPattern,
+                stopWordParameterName,
+                dryRunStopWordParameterName)
+
+        commands.add(ReadLogcatFromReader(logger, firstRunlogcatParser1, logcatReader))
+
+        commands.add(SleepCommand(1))
+        commands.add(KillAppCommand(logger, appId))
+
+        val logcatParser = StartupTimeLogcatParser(logger,
+                aggregatorProvider.aggregator1,
+                logcatValuesPattern,
+                stopWordParameterName,
+                dryRunStopWordParameterName)
+
         for (i in 0 until measuresCount) {
-            commands.add(firstAppMeasurementLoop(logcatParser))
+            commands.add(firstAppMeasurementLoop(i, logcatParser, logcatReader))
         }
 
-        commands.add(ClearLogcatCommand(logger))
-        commands.add(DeleteApkCommand(appId))
+        commands.add(DeleteApkCommand(appId, logger))
         commands.add(InstallApkCommand(logger, secondApk))
         commands.add(StartActivityCommand(appId, startActivityName))
-        commands.add(ReadLogcatCommand(logger, StartupTimeLogcatParser(logger, EmptyMeasurementAggregator, logcatValuesPattern)))
-        commands.add(SleepCommand(1))
-        commands.add(ClearLogcatCommand(logger))
-        commands.add(KillAppCommand(logger))
 
-        val logcatParser2 = StartupTimeLogcatParser(logger, aggregatorProvider.aggregator2, logcatValuesPattern)
+        val firstStartLogcatParser2 = StartupTimeLogcatParser(logger,
+                EmptyMeasurementAggregator,
+                logcatValuesPattern,
+                stopWordParameterName,
+                dryRunStopWordParameterName)
+
+        commands.add(ReadLogcatFromReader(logger, firstStartLogcatParser2, logcatReader))
+
+        commands.add(SleepCommand(1))
+        commands.add(KillAppCommand(logger, appId))
+
+        val logcatParser3 = StartupTimeLogcatParser(logger,
+                aggregatorProvider.aggregator2,
+                logcatValuesPattern,
+                stopWordParameterName,
+                dryRunStopWordParameterName)
+
         for (i in 0 until measuresCount) {
-            commands.add(secondAppMeasurementLoop(logcatParser2))
+            commands.add(secondAppMeasurementLoop(i, logcatParser3, logcatReader))
         }
         return commands
     }
 
-    private fun firstAppMeasurementLoop(logcatParser: LogcatParser): CompositeCommand {
-        return CompositeCommand(listOf(
-                ClearLogcatCommand(logger),
+    private fun firstAppMeasurementLoop(iteration: Int, logcatParser: LogcatParser, logcatReader: LogcatReader): CompositeCommand {
+        return CompositeCommand(iteration, logger, listOf(
                 StartActivityCommand(appId, startActivityName),
-                ReadLogcatCommand(logger, logcatParser),
+                ReadLogcatFromReader(logger, logcatParser, logcatReader),
                 SleepCommand(1),
-                KillAppCommand(logger)
+                KillAppCommand(logger, appId)
         ))
     }
 
-    private fun secondAppMeasurementLoop(logcatParser: LogcatParser): CompositeCommand {
-        return CompositeCommand(listOf(
-                ClearLogcatCommand(logger),
+    private fun secondAppMeasurementLoop(iteration: Int, logcatParser: LogcatParser, logcatReader: LogcatReader): CompositeCommand {
+        return CompositeCommand(iteration, logger, listOf(
                 StartActivityCommand(appId, startActivityName),
-                ReadLogcatCommand(logger, logcatParser),
+                ReadLogcatFromReader(logger, logcatParser, logcatReader),
                 SleepCommand(1),
-                KillAppCommand(logger)
+                KillAppCommand(logger, appId)
         ))
     }
 }

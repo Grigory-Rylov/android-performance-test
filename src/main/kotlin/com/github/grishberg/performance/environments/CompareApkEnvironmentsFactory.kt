@@ -1,6 +1,6 @@
 package com.github.grishberg.performance.environments
 
-import com.github.grishberg.tests.ConnectedDeviceWrapper
+import com.github.grishberg.performance.launcher.DeviceFacade
 import com.github.grishberg.tests.common.RunnerLogger
 
 class CompareApkEnvironmentsFactory(
@@ -10,9 +10,11 @@ class CompareApkEnvironmentsFactory(
         private val startActivityName: String,
         private val envData1: EnvironmentData,
         private val envData2: EnvironmentData,
-        private val logcatValuesPattern: String
+        private val logcatValuesPattern: String,
+        private val stopWordParameterName: String,
+        private val dryRunStopWordParameterName: String
 ) : EnvironmentsFactory {
-    override fun create(device: ConnectedDeviceWrapper): MeasurementEnvironments {
+    override fun create(device: DeviceFacade): MeasurementEnvironments {
         return CompareTwoApkEnvironments(logger,
                 measurementCount,
                 appId,
@@ -20,6 +22,8 @@ class CompareApkEnvironmentsFactory(
                 envData1,
                 envData2,
                 device,
-                logcatValuesPattern)
+                logcatValuesPattern,
+                stopWordParameterName,
+                dryRunStopWordParameterName)
     }
 }

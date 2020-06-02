@@ -1,6 +1,7 @@
 package com.github.grishberg.performance.report
 
 import com.github.grishberg.performance.aggregation.MeasurementAggregator
+import com.github.grishberg.performance.data.MeasurementData
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
@@ -14,7 +15,8 @@ class CompareHtmlReport(
         private val deviceName: String,
         private val measurementCount: Int,
         private val results1: MeasurementAggregator,
-        private val results2: MeasurementAggregator
+        private val results2: MeasurementAggregator,
+        private val shouldShowSecondValue: Boolean = false
 ) : Reporter {
     override fun buildReport() {
         val sb = StringBuilder()
@@ -30,7 +32,7 @@ class CompareHtmlReport(
 
             val threadTime1 = data.value.threadTime
 
-            val threadTime2 = average2.getValue(data.key).threadTime
+            val threadTime2 = average2.getOrDefault(data.key, MeasurementData(0, 0)).threadTime
             val threadDiff = abs(threadTime1 - threadTime2)
             val threadDiffInPercent = (abs(threadTime1 - threadTime2) / max(threadTime1, threadTime2) * 100.0).roundToInt()
 
@@ -38,9 +40,10 @@ class CompareHtmlReport(
             val threadTimeColor2 = color(threadTime1, threadTime2)
 
             val nanoDuration1 = data.value.nanoDuration / 1000.0
-            val nanoDuration2 = average2.getValue(data.key).nanoDuration / 1000.0
+            val nanoDuration2 = average2.getOrDefault(data.key, MeasurementData(0, 0)).nanoDuration / 1000.0
             val globalDiff = abs(nanoDuration1 - nanoDuration2)
-            val globalDiffInPercent = (abs(nanoDuration1 - nanoDuration2) / max(nanoDuration1, nanoDuration2) * 100.0).roundToInt()
+            val maxGlobalDuration = max(nanoDuration1, nanoDuration2)
+            val globalDiffInPercent = if (maxGlobalDuration == 0.0) 0 else (abs(nanoDuration1 - nanoDuration2) / maxGlobalDuration * 100.0).roundToInt()
 
             val globalTimeColor1 = "black"
             val globalTimeColor2 = color(nanoDuration1, nanoDuration2)
@@ -69,6 +72,9 @@ class CompareHtmlReport(
 
             sb.append("</tr>\n")
 
+            if (!shouldShowSecondValue) {
+                continue
+            }
 
             sb.append("<tr>")
             sb.append("<td align=\"left\" style=\"background-color:#AAAAAA;color:black;\">")

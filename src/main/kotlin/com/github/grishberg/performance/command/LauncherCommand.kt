@@ -1,10 +1,10 @@
 package com.github.grishberg.performance.command
 
-import com.github.grishberg.tests.ConnectedDeviceWrapper
+import com.github.grishberg.performance.launcher.DeviceFacade
 
 /**
  * launches commands on device.
  */
 interface LauncherCommand {
-    fun execute(device: ConnectedDeviceWrapper)
+    fun execute(device: DeviceFacade)
 }

@@ -7,8 +7,8 @@ import com.github.grishberg.performance.command.LauncherCommand
 import com.github.grishberg.performance.command.ReadLogcatCommand
 import com.github.grishberg.performance.command.StartActivityWithParametersCommand
 import com.github.grishberg.performance.command.logcat.PerfLogcatReader
+import com.github.grishberg.performance.launcher.DeviceFacade
 import com.github.grishberg.performance.launcher.SourceCodeInfo
-import com.github.grishberg.tests.ConnectedDeviceWrapper
 import com.github.grishberg.tests.common.RunnerLogger
 import java.io.File
 
@@ -24,17 +24,17 @@ class CompareFromSourcesCommandsFactory(
         private val iterationsPerLaunch: Int
 ) : Commands {
 
-    override fun execute(device: ConnectedDeviceWrapper) {
+    override fun execute(device: DeviceFacade, logcatReader: LogcatReader) {
         val commands = ArrayList<LauncherCommand>()
         commands.add(InstallApkCommand(logger, File(PATH_TO_APK)))
         for (i in 0 until launchesCount) {
             commands.add(ClearLogcatCommand(logger))
             commands.add(StartActivityWithParametersCommand(0, generateModeForFirstRun(), iterationsPerLaunch))
-            commands.add(ReadLogcatCommand(logger, PerfLogcatReader(logger, 0, resultsPrinter)))
-            commands.add(KillAppCommand(logger))
+            commands.add(ReadLogcatCommand(logger, PerfLogcatReader(logger, 0, resultsPrinter), "PERF", 15 * 60))
+            commands.add(KillAppCommand(logger, "com.grishberg.performeter"))
             commands.add(StartActivityWithParametersCommand(1, generateModeForSecondRun(), iterationsPerLaunch))
-            commands.add(ReadLogcatCommand(logger, PerfLogcatReader(logger, 1, resultsPrinter)))
-            commands.add(KillAppCommand(logger))
+            commands.add(ReadLogcatCommand(logger, PerfLogcatReader(logger, 1, resultsPrinter), "PERF", 15 * 60))
+            commands.add(KillAppCommand(logger, "com.grishberg.performeter"))
         }
         commands.forEach {
             it.execute(device)

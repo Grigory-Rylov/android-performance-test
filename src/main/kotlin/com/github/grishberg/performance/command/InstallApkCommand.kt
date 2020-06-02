@@ -1,5 +1,6 @@
 package com.github.grishberg.performance.command
 
+import com.github.grishberg.performance.launcher.DeviceFacade
 import com.github.grishberg.tests.ConnectedDeviceWrapper
 import com.github.grishberg.tests.commands.CommandExecutionException
 import com.github.grishberg.tests.common.RunnerLogger
@@ -13,7 +14,7 @@ class InstallApkCommand(
         private val apkFile: File
 ) : LauncherCommand {
 
-    override fun execute(device: ConnectedDeviceWrapper) {
+    override fun execute(device: DeviceFacade) {
         var lastException: Throwable? = null
         for (i in 0..2) {
             try {
