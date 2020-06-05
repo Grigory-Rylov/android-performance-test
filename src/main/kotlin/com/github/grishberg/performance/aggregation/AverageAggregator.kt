@@ -11,7 +11,7 @@ class AverageAggregator(
         private val measurementCount: Int
 ) : MeasurementAggregator {
     private var count = 0
-    private var _values = mutableMapOf<String, MutableList<MeasurementData>>()
+    private val _values = mutableMapOf<String, MutableList<MeasurementData>>()
 
     private val _average = mutableMapOf<String, MeasurementData>()
 

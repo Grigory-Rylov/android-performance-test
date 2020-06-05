@@ -2,9 +2,9 @@ package com.github.grishberg.performance.report
 
 import com.github.grishberg.performance.aggregation.MeasurementAggregator
 import com.github.grishberg.tests.common.RunnerLogger
-import java.io.BufferedWriter
+import org.apache.commons.math3.stat.inference.MannWhitneyUTest
+import java.awt.Color
 import java.io.File
-import java.io.FileWriter
 import java.text.SimpleDateFormat
 import java.util.Date
 import kotlin.math.abs
@@ -33,13 +33,18 @@ class CompareHtmlReport(
         val average2 = results2.average
         for (data in average1) {
             // TODO make for-cycle for each data.values
-            val time = data.value.values[0]
+            var valueIndex = 0
+            val time = data.value.values[valueIndex]
             if (average2[data.key] == null) {
-                logger.e(TAG,"No data for second run key=${data.key}")
+                logger.e(TAG, "No data for second run key=${data.key}")
                 continue
             }
 
-            val time2 = average2.getValue(data.key).values[0]
+            val values1 = results1.values.getValue(data.key).map { it.values[valueIndex] }
+            val values2 = results2.values.getValue(data.key).map { it.values[valueIndex] }
+            val pValue = MannWhitneyUTest().mannWhitneyUTest(values1.toDoubleArray(), values2.toDoubleArray())
+
+            val time2 = average2.getValue(data.key).values[valueIndex]
             val timeDiff = abs(time - time2)
             val timeDiffInPercent = (abs(time - time2) / max(time, time2) * 100.0).roundToInt()
 
@@ -68,6 +73,10 @@ class CompareHtmlReport(
             sb.append("$timeDiffInPercent")
             sb.append("</td>")
 
+            sb.append("<td style=\"color:${getPValueColor(pValue)};\">")
+            sb.append("$pValue")
+            sb.append("</td>")
+
             sb.append("</tr>\n")
         }
         sb.append("</table>")
@@ -83,7 +92,16 @@ class CompareHtmlReport(
         } else {
             "red"
         }
+    }
 
+    private fun getPValueColor(pValue: Double): String {
+        if (pValue < 0.0001) {
+            return "green"
+        }
+        if (pValue < 0.001) {
+            return "brown"
+        }
+        return "red"
     }
 
     private fun buildHeader(sb: StringBuilder) {
@@ -93,6 +111,7 @@ class CompareHtmlReport(
         sb.append("<td>${results2.measurementName}</td>")
         sb.append("<td>diff</td>")
         sb.append("<td>diff in percents</td>")
+        sb.append("<td>p-value</td>")
         sb.append("</tr>")
     }
 

@@ -14,11 +14,12 @@ import com.github.grishberg.performance.command.StartActivityCommand
 import com.github.grishberg.performance.command.logcat.LogcatParser
 import com.github.grishberg.performance.command.logcat.StartupTimeLogcatParser
 import com.github.grishberg.performance.launcher.DeviceFacade
-import com.github.grishberg.tests.ConnectedDeviceWrapper
 import com.github.grishberg.tests.common.RunnerLogger
 import java.io.File
 
 private const val TAG = "CFAC"
+private const val SLEEP_BEFORE_KILL_SECONDS = 1
+private const val SLEEP_AFTER_KILL_SECONDS = 1
 
 /**
  * Deletes apk with [appId] if installed.
@@ -47,6 +48,12 @@ class CompareFromApkCommands(
         private val dryRunStopWordParameterName: String,
         private val permissions: List<String>
 ) : Commands {
+    private val dryRunLogcatParser = StartupTimeLogcatParser(logger,
+            EmptyMeasurementAggregator,
+            logcatValuesPattern,
+            stopWordParameterName,
+            dryRunStopWordParameterName)
+
     override fun execute(device: DeviceFacade, logcatReader: LogcatReader) {
         val commands = buildCommands(logcatReader)
 
@@ -59,61 +66,49 @@ class CompareFromApkCommands(
 
     private fun buildCommands(logcatReader: LogcatReader): ArrayList<LauncherCommand> {
         val commands = ArrayList<LauncherCommand>()
-        commands.add(DeleteApkCommand(appId, logger))
-        commands.add(InstallApkCommand(logger, firstApk))
-        if (permissions.isNotEmpty()) {
-            commands.add(GrantPermissionsCommand(appId, permissions))
-        }
-        commands.add(StartActivityCommand(appId, startActivityName))
 
-        val firstRunlogcatParser1 = StartupTimeLogcatParser(logger,
-                EmptyMeasurementAggregator,
-                logcatValuesPattern,
-                stopWordParameterName,
-                dryRunStopWordParameterName)
+        // install first apk
+        commands.addAll(installAndPrepareApk(firstApk, logcatReader))
 
-        commands.add(ReadLogcatFromReader(logger, firstRunlogcatParser1, logcatReader))
-
-        commands.add(SleepCommand(1))
-        commands.add(KillAppCommand(logger, appId))
-
-        val logcatParser = StartupTimeLogcatParser(logger,
+        val logcatParser1 = StartupTimeLogcatParser(logger,
                 aggregatorProvider.aggregator1,
                 logcatValuesPattern,
                 stopWordParameterName,
                 dryRunStopWordParameterName)
 
         for (i in 0 until measuresCount) {
-            commands.add(firstAppMeasurementLoop(i, logcatParser, logcatReader))
+            commands.add(firstAppMeasurementLoop(i, logcatParser1, logcatReader))
         }
 
-        commands.add(DeleteApkCommand(appId, logger))
-        commands.add(InstallApkCommand(logger, secondApk))
-        if (permissions.isNotEmpty()) {
-            commands.add(GrantPermissionsCommand(appId, permissions))
-        }
-        commands.add(StartActivityCommand(appId, startActivityName))
+        // install second apk
+        commands.addAll(installAndPrepareApk(secondApk, logcatReader))
 
-        val firstStartLogcatParser2 = StartupTimeLogcatParser(logger,
-                EmptyMeasurementAggregator,
-                logcatValuesPattern,
-                stopWordParameterName,
-                dryRunStopWordParameterName)
-
-        commands.add(ReadLogcatFromReader(logger, firstStartLogcatParser2, logcatReader))
-
-        commands.add(SleepCommand(1))
-        commands.add(KillAppCommand(logger, appId))
-
-        val logcatParser3 = StartupTimeLogcatParser(logger,
+        val logcatParser2 = StartupTimeLogcatParser(logger,
                 aggregatorProvider.aggregator2,
                 logcatValuesPattern,
                 stopWordParameterName,
                 dryRunStopWordParameterName)
 
         for (i in 0 until measuresCount) {
-            commands.add(secondAppMeasurementLoop(i, logcatParser3, logcatReader))
+            commands.add(secondAppMeasurementLoop(i, logcatParser2, logcatReader))
         }
+        return commands
+    }
+
+    private fun installAndPrepareApk(apk: File, logcatReader: LogcatReader): List<LauncherCommand> {
+        val commands = mutableListOf<LauncherCommand>()
+
+        commands.add(DeleteApkCommand(appId, logger))
+        commands.add(InstallApkCommand(logger, apk))
+        if (permissions.isNotEmpty()) {
+            commands.add(GrantPermissionsCommand(appId, permissions))
+        }
+        commands.add(StartActivityCommand(appId, startActivityName))
+        commands.add(ReadLogcatFromReader(logger, dryRunLogcatParser, logcatReader))
+        commands.add(SleepCommand(SLEEP_BEFORE_KILL_SECONDS))
+        commands.add(KillAppCommand(logger, appId))
+        commands.add(SleepCommand(SLEEP_AFTER_KILL_SECONDS))
+
         return commands
     }
 
@@ -121,8 +116,9 @@ class CompareFromApkCommands(
         return CompositeCommand(iteration, logger, listOf(
                 StartActivityCommand(appId, startActivityName),
                 ReadLogcatFromReader(logger, logcatParser, logcatReader),
-                SleepCommand(1),
-                KillAppCommand(logger, appId)
+                SleepCommand(SLEEP_BEFORE_KILL_SECONDS),
+                KillAppCommand(logger, appId),
+                SleepCommand(SLEEP_AFTER_KILL_SECONDS)
         ))
     }
 
@@ -130,8 +126,9 @@ class CompareFromApkCommands(
         return CompositeCommand(iteration, logger, listOf(
                 StartActivityCommand(appId, startActivityName),
                 ReadLogcatFromReader(logger, logcatParser, logcatReader),
-                SleepCommand(1),
-                KillAppCommand(logger, appId)
+                SleepCommand(SLEEP_BEFORE_KILL_SECONDS),
+                KillAppCommand(logger, appId),
+                SleepCommand(SLEEP_AFTER_KILL_SECONDS)
         ))
     }
 }

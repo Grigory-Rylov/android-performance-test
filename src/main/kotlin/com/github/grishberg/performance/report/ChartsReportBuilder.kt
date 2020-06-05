@@ -53,7 +53,7 @@ class ChartsReportBuilder(
     private fun createXAxis(size: Int): String {
         val sb = StringBuilder()
         for (i in 0 until size) {
-            sb.append("${(i + 1)}")
+            sb.append("${(i)}")
             if (i < size - 1) {
                 sb.append(", ")
             }
