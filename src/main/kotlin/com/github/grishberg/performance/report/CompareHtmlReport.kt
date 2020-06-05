@@ -3,7 +3,6 @@ package com.github.grishberg.performance.report
 import com.github.grishberg.performance.aggregation.MeasurementAggregator
 import com.github.grishberg.tests.common.RunnerLogger
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest
-import java.awt.Color
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -35,16 +34,27 @@ class CompareHtmlReport(
             // TODO make for-cycle for each data.values
             var valueIndex = 0
             val time = data.value.values[valueIndex]
-            if (average2[data.key] == null) {
+            val values1 = results1.values.getValue(data.key).map { it.values[valueIndex] }
+
+            val values2: List<Double>
+            val time2: Double
+            val measurementData2 = average2[data.key]
+            if (measurementData2 == null) {
                 logger.e(TAG, "No data for second run key=${data.key}")
-                continue
+                // create dump data
+                values2 = emptyList()
+                time2 = 0.0
+            } else {
+                values2 = results2.values.getValue(data.key).map { it.values[valueIndex] }
+                time2 = measurementData2.values[valueIndex]
             }
 
-            val values1 = results1.values.getValue(data.key).map { it.values[valueIndex] }
-            val values2 = results2.values.getValue(data.key).map { it.values[valueIndex] }
-            val pValue = MannWhitneyUTest().mannWhitneyUTest(values1.toDoubleArray(), values2.toDoubleArray())
+            val pValue = if (values1.isNotEmpty() && values2.isEmpty()) {
+                MannWhitneyUTest().mannWhitneyUTest(values1.toDoubleArray(), values2.toDoubleArray())
+            } else {
+                1.0
+            }
 
-            val time2 = average2.getValue(data.key).values[valueIndex]
             val timeDiff = abs(time - time2)
             val timeDiffInPercent = (abs(time - time2) / max(time, time2) * 100.0).roundToInt()
 
@@ -74,7 +84,7 @@ class CompareHtmlReport(
             sb.append("</td>")
 
             sb.append("<td style=\"color:${getPValueColor(pValue)};\">")
-            sb.append("$pValue")
+            sb.append("%.8f".format(pValue))
             sb.append("</td>")
 
             sb.append("</tr>\n")
@@ -98,7 +108,7 @@ class CompareHtmlReport(
         if (pValue < 0.0001) {
             return "green"
         }
-        if (pValue < 0.001) {
+        if (pValue < 0.02) {
             return "brown"
         }
         return "red"
