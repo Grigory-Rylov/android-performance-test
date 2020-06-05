@@ -1,0 +1,51 @@
+<div id="chart%CHARTINDEX%" style="height: 300px"></div>
+
+<script type="text/javascript">
+var dom = document.getElementById("chart%CHARTINDEX%");
+var myChart = echarts.init(dom);
+var app = {};
+option = null;
+option = {
+    title: {
+        text: '%NAME%',
+        left: 'center'
+    },
+    tooltip: {
+        trigger: 'axis',
+        left: 'center'
+    },
+    legend: {
+        left: 'left',
+        data: ['%MEASURENAME1%', '%MEASURENAME2%']
+    },
+    grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '3%',
+        containLabel: true
+    },
+    xAxis: {
+        type: 'category',
+        data: [%XAXIS%]
+    },
+    yAxis: {
+        type: 'value'
+    },
+    series: [{
+        name: '%MEASURENAME1%',
+        data: [%SERIES1%],
+        type: 'line'
+    },
+    {
+        name: '%MEASURENAME2%',
+        data: [%SERIES2%],
+        type: 'line'
+    }
+    ]
+};
+;
+if (option && typeof option === "object") {
+    myChart.setOption(option, true);
+}
+
+</script>

@@ -2,6 +2,7 @@ package com.github.grishberg.performance.command.logcat
 
 import com.github.grishberg.performance.aggregation.MeasurementAggregator
 import com.github.grishberg.performance.data.MeasurementData
+import com.github.grishberg.performance.data.WallTimeData
 import com.github.grishberg.performance.launcher.DeviceFacade
 import com.github.grishberg.tests.common.RunnerLogger
 
@@ -28,22 +29,16 @@ class StartupTimeLogcatParser(
             if (results != null) {
                 val timeString = results.groupValues[1]
                 val name = results.groupValues[2]
-                val key = timeString + name
-                if (name == firstStartStopWordParameterName) {
-                    // first run
-                    logger.d(TAG, "Exit from first run after install")
-                    return true
-                }
                 val threadDuration = results.groupValues[3].toLong()
-                val nanoDuration = if (results.groups.size > 4) {
-                    results.groupValues[4].toLong()
-                } else {
-                    0
-                }
-                data[name] = MeasurementData(threadDuration, nanoDuration)
+                data[name] = WallTimeData(threadDuration)
                 if (name == stopWordParameterName) {
                     logger.d(TAG, "found $name, finish parsing.")
                     resultsAggregator.addResult(data)
+                    return true
+                }
+                if (name == firstStartStopWordParameterName) {
+                    // first run
+                    logger.d(TAG, "Exit from first run after install")
                     return true
                 }
             }

@@ -4,6 +4,7 @@ import com.github.grishberg.performance.aggregation.AggregatorProvider
 import com.github.grishberg.performance.aggregation.EmptyMeasurementAggregator
 import com.github.grishberg.performance.command.CompositeCommand
 import com.github.grishberg.performance.command.DeleteApkCommand
+import com.github.grishberg.performance.command.GrantPermissionsCommand
 import com.github.grishberg.performance.command.InstallApkCommand
 import com.github.grishberg.performance.command.KillAppCommand
 import com.github.grishberg.performance.command.LauncherCommand
@@ -43,7 +44,8 @@ class CompareFromApkCommands(
         private val aggregatorProvider: AggregatorProvider,
         private val logcatValuesPattern: String,
         private val stopWordParameterName: String,
-        private val dryRunStopWordParameterName: String
+        private val dryRunStopWordParameterName: String,
+        private val permissions: List<String>
 ) : Commands {
     override fun execute(device: DeviceFacade, logcatReader: LogcatReader) {
         val commands = buildCommands(logcatReader)
@@ -59,6 +61,9 @@ class CompareFromApkCommands(
         val commands = ArrayList<LauncherCommand>()
         commands.add(DeleteApkCommand(appId, logger))
         commands.add(InstallApkCommand(logger, firstApk))
+        if (permissions.isNotEmpty()) {
+            commands.add(GrantPermissionsCommand(appId, permissions))
+        }
         commands.add(StartActivityCommand(appId, startActivityName))
 
         val firstRunlogcatParser1 = StartupTimeLogcatParser(logger,
@@ -84,6 +89,9 @@ class CompareFromApkCommands(
 
         commands.add(DeleteApkCommand(appId, logger))
         commands.add(InstallApkCommand(logger, secondApk))
+        if (permissions.isNotEmpty()) {
+            commands.add(GrantPermissionsCommand(appId, permissions))
+        }
         commands.add(StartActivityCommand(appId, startActivityName))
 
         val firstStartLogcatParser2 = StartupTimeLogcatParser(logger,

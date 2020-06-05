@@ -1,12 +1,24 @@
 package com.github.grishberg.performance.data
 
-data class MeasurementData(val threadTime: Double,
-                           val nanoDuration: Double) {
-    constructor(threadTime: Long,
-                nanoDuration: Long) : this(threadTime.toDouble(), nanoDuration.toDouble())
+/**
+ * Holds measurement of one event.
+ * It can holds wall time, thread time, time from start, or time from previous event,
+ * but for the one event.
+ */
+interface MeasurementData {
+    /**
+     * List of values.
+     */
+    val values: List<Double>
+    /**
+     * Description of [values], size must be equals to size of [values]
+     */
+    val valuesDescription: Array<String>
 
-    fun add(newData: MeasurementData): MeasurementData {
-        return MeasurementData(threadTime + newData.threadTime,
-                nanoDuration + newData.nanoDuration)
-    }
+    fun sum(newData: MeasurementData): MeasurementData
+
+    /**
+     * Calculates average for
+     */
+    fun average(iterationsCount: Int): MeasurementData
 }

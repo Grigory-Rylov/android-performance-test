@@ -1,26 +1,29 @@
 package com.github.grishberg.performance.report
 
 import com.github.grishberg.performance.aggregation.MeasurementAggregator
-import com.github.grishberg.performance.data.MeasurementData
+import com.github.grishberg.tests.common.RunnerLogger
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
-import java.lang.Math.abs
-import java.lang.Math.max
 import java.text.SimpleDateFormat
 import java.util.Date
+import kotlin.math.abs
+import kotlin.math.max
 import kotlin.math.roundToInt
 
+private const val TAG = "CompareHtmlReport"
+
 class CompareHtmlReport(
+        private val logger: RunnerLogger,
         private val deviceName: String,
         private val measurementCount: Int,
         private val results1: MeasurementAggregator,
-        private val results2: MeasurementAggregator,
-        private val shouldShowSecondValue: Boolean = false
+        private val results2: MeasurementAggregator
 ) : Reporter {
+    private val chartsBuilder = ChartsReportBuilder(deviceName, results1, results2)
+
     override fun buildReport() {
         val sb = StringBuilder()
-        sb.append("<html>")
         sb.append("device: $deviceName <br/>")
         sb.append("<table cellpadding=\"4\">")
 
@@ -29,80 +32,45 @@ class CompareHtmlReport(
         val average1 = results1.average
         val average2 = results2.average
         for (data in average1) {
-
-            val threadTime1 = data.value.threadTime
-
-            val threadTime2 = average2.getOrDefault(data.key, MeasurementData(0, 0)).threadTime
-            val threadDiff = abs(threadTime1 - threadTime2)
-            val threadDiffInPercent = (abs(threadTime1 - threadTime2) / max(threadTime1, threadTime2) * 100.0).roundToInt()
-
-            val threadTimeColor1 = "black"
-            val threadTimeColor2 = color(threadTime1, threadTime2)
-
-            val nanoDuration1 = data.value.nanoDuration / 1000.0
-            val nanoDuration2 = average2.getOrDefault(data.key, MeasurementData(0, 0)).nanoDuration / 1000.0
-            val globalDiff = abs(nanoDuration1 - nanoDuration2)
-            val maxGlobalDuration = max(nanoDuration1, nanoDuration2)
-            val globalDiffInPercent = if (maxGlobalDuration == 0.0) 0 else (abs(nanoDuration1 - nanoDuration2) / maxGlobalDuration * 100.0).roundToInt()
-
-            val globalTimeColor1 = "black"
-            val globalTimeColor2 = color(nanoDuration1, nanoDuration2)
-
-            sb.append("<tr>")
-
-            sb.append("<td align=\"left\" style=\"background-color:#AAAAAA;color:black;\">")
-            sb.append("${data.key} thread")
-            sb.append("</td>")
-
-            sb.append("<td style=\"color:$threadTimeColor1;\">")
-            sb.append("%.2f".format(threadTime1))
-            sb.append("</td>")
-
-            sb.append("<td style=\"color:$threadTimeColor2;\">")
-            sb.append("%.2f".format(threadTime2))
-            sb.append("</td>")
-
-            sb.append("<td style=\"color:$threadTimeColor2;\">")
-            sb.append("%.2f".format(threadDiff))
-            sb.append("</td>")
-
-            sb.append("<td style=\"color:$threadTimeColor2;\">")
-            sb.append("$threadDiffInPercent")
-            sb.append("</td>")
-
-            sb.append("</tr>\n")
-
-            if (!shouldShowSecondValue) {
+            // TODO make for-cycle for each data.values
+            val time = data.value.values[0]
+            if (average2[data.key] == null) {
+                logger.e(TAG,"No data for second run key=${data.key}")
                 continue
             }
 
+            val time2 = average2.getValue(data.key).values[0]
+            val timeDiff = abs(time - time2)
+            val timeDiffInPercent = (abs(time - time2) / max(time, time2) * 100.0).roundToInt()
+
+            val timeColor1 = "black"
+            val timeColor2 = color(time, time2)
+
             sb.append("<tr>")
+
             sb.append("<td align=\"left\" style=\"background-color:#AAAAAA;color:black;\">")
-            sb.append("${data.key} global")
+            sb.append(data.key)
             sb.append("</td>")
 
-            sb.append("<td style=\"color:$globalTimeColor1;\">")
-            sb.append("%.2f".format(nanoDuration1))
+            sb.append("<td style=\"color:$timeColor1;\">")
+            sb.append("%.2f".format(time))
             sb.append("</td>")
 
-            sb.append("<td style=\"color:$globalTimeColor2;\">")
-            sb.append("%.2f".format(nanoDuration2))
-
+            sb.append("<td style=\"color:$timeColor2;\">")
+            sb.append("%.2f".format(time2))
             sb.append("</td>")
 
-            sb.append("<td style=\"color:$globalTimeColor2;\">")
-            sb.append("%.2f".format(globalDiff))
-
+            sb.append("<td style=\"color:$timeColor2;\">")
+            sb.append("%.2f".format(timeDiff))
             sb.append("</td>")
 
-            sb.append("<td style=\"color:$globalTimeColor2;\">")
-            sb.append("$globalDiffInPercent")
+            sb.append("<td style=\"color:$timeColor2;\">")
+            sb.append("$timeDiffInPercent")
             sb.append("</td>")
+
             sb.append("</tr>\n")
         }
         sb.append("</table>")
-        sb.append("</html>")
-
         writeToFile(sb.toString())
     }
 
@@ -128,17 +96,13 @@ class CompareHtmlReport(
         sb.append("</tr>")
     }
 
-    private fun writeToFile(str: String) {
+    private fun writeToFile(table: String) {
         val dir = File("reports")
         if (!dir.exists()) {
             dir.mkdir()
         }
         val date = Date()
         val formattedDate = SimpleDateFormat("yyyyMMdd_HH-mm-ss").format(date)
-        val fn = "results_${formattedDate}_$deviceName.html"
-        val writer = BufferedWriter(FileWriter(File(dir, fn)))
-        writer.write(str)
-        writer.close()
+        chartsBuilder.build(formattedDate, table)
     }
-
 }

@@ -1,40 +1,53 @@
 package com.github.grishberg.performance.aggregation
 
 import com.github.grishberg.performance.data.MeasurementData
+import com.github.grishberg.tests.common.RunnerLogger
 
-private const val APP_STARTUP = "App.onCreate"
-private const val ACTIVITY_STARTUP = "MainActivity.onCreate"
-private const val ACTIVITY_SET_CONTENT_VIEW = "MainActivity.setContentView"
-private const val ACTIVITY_ON_RESUME = "MainActivity.onResume"
-private const val ACTIVITY_ON_PRE_DRAW = "MainActivity.onPreDraw"
+private const val TAG = "AverageAggregator"
 
 class AverageAggregator(
+        private val logger: RunnerLogger,
         override val measurementName: String,
         private val measurementCount: Int
 ) : MeasurementAggregator {
     private var count = 0
-    private var values = mutableMapOf<String, MeasurementData>()
+    private var _values = mutableMapOf<String, MutableList<MeasurementData>>()
+
+    private val _average = mutableMapOf<String, MeasurementData>()
+
+    override val values: Map<String, List<MeasurementData>>
+        get() = _values
+
     override val average: Map<String, MeasurementData>
         get() = averageValues()
 
     private fun averageValues(): Map<String, MeasurementData> {
-        var result = mutableMapOf<String, MeasurementData>()
-        for (data in values) {
-            val currentData = values.getOrDefault(data.key, MeasurementData(0, 0))
-            val countAsDouble = count.toDouble()
-            result[data.key] = MeasurementData(currentData.threadTime / countAsDouble, currentData.nanoDuration / countAsDouble)
+        if (_average.isNotEmpty()) {
+            return _average
         }
-        return result
+
+        for (currentValue in _values) {
+            val valuesForKey = currentValue.value
+
+            var averageValueForKey = valuesForKey.first()
+            for (i in 1 until valuesForKey.size) {
+                averageValueForKey = averageValueForKey.sum(valuesForKey[i])
+            }
+
+            _average[currentValue.key] = averageValueForKey.average(valuesForKey.size)
+        }
+
+        return _average
     }
 
     override fun addResult(result: Map<String, MeasurementData>) {
+        _average.clear()
         if (count >= measurementCount) {
-            throw IllegalStateException("Current measurement count $count is more than required $measurementCount") as Throwable
-
+            throw IllegalStateException("Current measurement count $count is more than required $measurementCount")
         }
-        for (data in result) {
-            val currentBucket = values.getOrDefault(data.key, MeasurementData(0, 0))
-            values[data.key] = currentBucket.add(data.value)
+        for (entry in result) {
+            val valuesForKey = _values.getOrPut(entry.key) { mutableListOf() }
+            valuesForKey.add(entry.value)
         }
         count++
     }

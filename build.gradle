@@ -40,6 +40,7 @@ dependencies {
     implementation group: 'log4j', name: 'log4j', version: '1.2.17'
     implementation 'com.android.tools.ddms:ddmlib:26.6.3'
     implementation "com.github.grishberg:android-instrumental-test-runner-core:1.6.14"
+    implementation 'com.google.code.gson:gson:2.8.6'
 
     testImplementation "junit:junit:4.12"
     testImplementation 'org.mockito:mockito-core:2.23.0'

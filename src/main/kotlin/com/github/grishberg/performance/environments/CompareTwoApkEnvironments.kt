@@ -8,45 +8,42 @@ import com.github.grishberg.performance.launcher.DeviceFacade
 import com.github.grishberg.performance.report.CompareHtmlReport
 import com.github.grishberg.performance.report.Reporter
 import com.github.grishberg.tests.common.RunnerLogger
+import java.io.File
 
 /**
  * Creates environments for compare two apk.
  */
 class CompareTwoApkEnvironments(
         private val logger: RunnerLogger,
-        private val measurementCount: Int,
-        private val appId: String,
-        private val startActivityName: String,
-        private val envData1: EnvironmentData,
-        private val envData2: EnvironmentData,
-        private val device: DeviceFacade,
-        private val logcatTagAndValuesPattern: String,
-        private val stopWordParameterName: String,
-        private val dryRunStopWordParameterName: String
+        private val configuration: Configuration,
+        private val device: DeviceFacade
 ) : MeasurementEnvironments {
     private val aggregatorProvider = AggregatorProvider(
-            envData1.measurementName,
-            envData2.measurementName,
-            AverageAggregatorFactory(measurementCount))
+            configuration.measurementName1,
+            configuration.measurementName2,
+            AverageAggregatorFactory(logger, configuration.measurementCount))
 
     override fun createCommands(): Commands {
         return CompareFromApkCommands(
-                appId,
-                startActivityName,
-                envData1.apkPath,
-                envData2.apkPath,
+                configuration.appId,
+                configuration.startActivityName,
+                File(configuration.apkPath1),
+                File(configuration.apkPath2),
                 logger,
-                measurementCount,
+                configuration.measurementCount,
                 aggregatorProvider,
-                logcatTagAndValuesPattern,
-                stopWordParameterName,
-                dryRunStopWordParameterName
+                configuration.logcatValuesRegexPattern,
+                configuration.lastParameterName,
+                configuration.stopDryRunParameterName,
+                configuration.permissions
         )
     }
 
     override fun createReporterForDevice(): Reporter {
-        return CompareHtmlReport(device.name,
-                measurementCount,
+        return CompareHtmlReport(
+                logger,
+                device.name,
+                configuration.measurementCount,
                 aggregatorProvider.aggregator1,
                 aggregatorProvider.aggregator2)
     }
