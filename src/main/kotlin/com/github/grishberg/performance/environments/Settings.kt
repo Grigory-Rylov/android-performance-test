@@ -35,6 +35,7 @@ class Settings {
                 "improvements",
                 "apk1.apk",
                 "apk2.apk",
+                "TAG",
                 "\\S+\\s\\S+\\s\\S+\\s(\\S+)\\ [time:]*\\s*([-\\d]+)",
                 "DryRunIsEnded",
                 "LastParameterName",

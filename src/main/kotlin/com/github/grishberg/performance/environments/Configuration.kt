@@ -8,6 +8,7 @@ data class Configuration(
         val measurementName2: String,
         val apkPath1: String,
         val apkPath2: String,
+        val logcatFilter: String,
         val logcatValuesRegexPattern: String,
         val stopDryRunParameterName: String,
         val lastParameterName: String,

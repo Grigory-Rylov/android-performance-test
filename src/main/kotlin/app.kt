@@ -17,7 +17,7 @@ private fun compareCompiledApk(logger: Log4JLogger) {
     val settings = Settings()
     val envFactory = CompareApkEnvironmentsFactory(logger, settings.configuration)
 
-    val launcher = ParallelPerformanceLauncher(logger, envFactory, "AppPerformanceStats")
+    val launcher = ParallelPerformanceLauncher(logger, envFactory, settings.configuration.logcatFilter)
 
     val configuration = RunConfiguration(logger)
     launcher.launchPerformance(configuration.adb)
