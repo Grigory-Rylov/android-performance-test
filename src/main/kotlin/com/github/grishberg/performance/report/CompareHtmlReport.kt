@@ -49,7 +49,7 @@ class CompareHtmlReport(
                 time2 = measurementData2.values[valueIndex]
             }
 
-            val pValue = if (values1.isNotEmpty() && values2.isEmpty()) {
+            val pValue = if (values1.isNotEmpty() && values2.isNotEmpty()) {
                 MannWhitneyUTest().mannWhitneyUTest(values1.toDoubleArray(), values2.toDoubleArray())
             } else {
                 1.0
