@@ -17,12 +17,12 @@ class DeviceFacade(
     val name: String = device.name
 
     fun executeShellCommand(cmd: String) {
-        device.executeShellCommand(cmd, CollectingOutputReceiver())
+        executeShellCommand(cmd, CollectingOutputReceiver(), 5L, TimeUnit.MINUTES)
     }
 
     fun executeShellCommand(command: String, receiver: IShellOutputReceiver,
                             maxTimeout: Long, maxTimeToOutputResponse: Long,
-                            maxTimeUnits: TimeUnit?) {
+                            maxTimeUnits: TimeUnit) {
         device.executeShellCommand(command, receiver, maxTimeout, maxTimeToOutputResponse, maxTimeUnits)
     }
 
