@@ -80,6 +80,7 @@ class CompareFromApkCommands(
             commands.add(firstAppMeasurementLoop(i, logcatParser1, logcatReader))
         }
 
+        commands.add(SleepCommand(15))
         // install second apk
         commands.addAll(installAndPrepareApk(secondApk, logcatReader))
 

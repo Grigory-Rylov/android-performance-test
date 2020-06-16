@@ -5,6 +5,7 @@ import com.github.grishberg.performance.command.logcat.LogcatParser
 import com.github.grishberg.performance.launcher.DeviceFacade
 import com.github.grishberg.tests.common.RunnerLogger
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 private const val TAG = "ReadLogcatFromReader"
 
@@ -19,7 +20,7 @@ class ReadLogcatFromReader(
         logger.d(TAG, "parse logcat..")
         val listener = Listener()
         logcat.addListener(listener)
-        countDownLatch.await()
+        countDownLatch.await(60, TimeUnit.SECONDS)
         logger.d(TAG, "ended parsing logcat")
     }
 
