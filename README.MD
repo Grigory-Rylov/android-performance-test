@@ -24,6 +24,7 @@
   "measurementCount": Количество запусков на каждую сборку apk (не включая первый dry запуск),
   "measurementName1": "Название замера первой apk",
   "measurementName2": "Название замера второй apk",
+  "logcatFilter": "Тэг, используемый для фильтрации логов",
   "apkPath1": "Путь к apk1",
   "apkPath2": "Путь к apk2",
   "logcatValuesRegexPattern": "Regex паттер, должен иметь минимум 2 группы, первая для имени замера, вторая для значения",
