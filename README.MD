@@ -20,10 +20,12 @@
 ```$json
 {
   "appId": "ApplicationId приложения",
-  "startActivityName": "Стартовая Activity приложения",
+  "startActivityName": "Стартовая Activity приложения, либо пустая строка если нужна произвольная adb shell команда",
+  "startActivityAdbShellCommand": "Adb shell команда для старта Activity"
   "measurementCount": Количество запусков на каждую сборку apk (не включая первый dry запуск),
   "measurementName1": "Название замера первой apk",
   "measurementName2": "Название замера второй apk",
+  "shouldDeleteBeforeInstall": true - если нужно удалить приложение перед установкой новой apk, иначе - false,
   "apkPath1": "Путь к apk1",
   "apkPath2": "Путь к apk2",
   "logcatFilter": "Тэг, используемый для фильтрации логов",

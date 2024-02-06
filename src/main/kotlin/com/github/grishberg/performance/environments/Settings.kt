@@ -12,6 +12,7 @@ import java.io.OutputStreamWriter
 private const val CONFIGURATION_FILE = "config.json"
 
 class Settings {
+
     private val gson = GsonBuilder().enableComplexMapKeySerialization().setPrettyPrinting().create()
     val configuration: Configuration
 
@@ -28,27 +29,30 @@ class Settings {
 
     private fun createEmptyFile() {
         var outputStream: FileOutputStream? = null
-        val configuration = Configuration("com.github.grishberg.perf",
-                "com.github.grishberg.perf.MainActivity",
-                10,
-                "base",
-                "improvements",
-                "apk1.apk",
-                "apk2.apk",
-                "TAG",
-                "\\S+\\s\\S+\\s\\S+\\s(\\S+)\\ [time:]*\\s*([-\\d]+)",
-                "DryRunIsEnded",
-                "LastParameterName",
-                listOf(
-                        "android.permission.ACCESS_FINE_LOCATION",
-                        "android.permission.RECORD_AUDIO",
-                        "android.permission.ACCESS_COARSE_LOCATION")
+        val configuration = Configuration(
+            appId = "com.github.grishberg.perf",
+            startActivityName = "com.github.grishberg.perf.MainActivity",
+            startActivityAdbShellCommand = "",
+            measurementCount = 10,
+            measurementName1 = "reference",
+            measurementName2 = "comparable",
+            shouldDeleteBeforeInstall = true,
+            apkPath1 = "apk1.apk",
+            apkPath2 = "apk2.apk",
+            logcatFilter = "YOUR_TAG",
+            logcatValuesRegexPattern = "\\S+\\s\\S+\\s(\\S+)\\ [time:]*\\s*([-\\d]+)",
+            stopDryRunParameterName = "DryRunIsEnded",
+            lastParameterName = "LastParameterName",
+            permissions = listOf(
+                "android.permission.ACCESS_FINE_LOCATION",
+                "android.permission.RECORD_AUDIO",
+                "android.permission.ACCESS_COARSE_LOCATION"
+            )
         )
 
         try {
             outputStream = FileOutputStream(CONFIGURATION_FILE)
-            val bufferedWriter: BufferedWriter
-            bufferedWriter = BufferedWriter(OutputStreamWriter(outputStream, "UTF-8"))
+            val bufferedWriter = BufferedWriter(OutputStreamWriter(outputStream, "UTF-8"))
             gson.toJson(configuration, bufferedWriter)
             bufferedWriter.close()
             println("Created dump file $CONFIGURATION_FILE")
